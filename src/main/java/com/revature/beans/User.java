@@ -23,6 +23,21 @@ public class User implements Serializable {
 	private UserType userType;
 	private List<Account> accounts;
 	
+	public User() {
+	}
+	
+	public User(String username) {
+		this.username = username;
+	}
+
+	public User(Integer id, String username, String password, String firstName, String lastName, UserType userType) {
+		this.id = id;
+		this.username = username;
+		this.password = password;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.userType = userType;
+	}
 	public Integer getId() {
 		return id;
 	}
@@ -59,6 +74,9 @@ public class User implements Serializable {
 	public void setUserType(UserType userType) {
 		this.userType = userType;
 	}
+//	public void setUserType(String userType) {
+//		this.userType = UserType.valueOf(userType);
+//	}
 	public List<Account> getAccounts() {
 		return accounts;
 	}

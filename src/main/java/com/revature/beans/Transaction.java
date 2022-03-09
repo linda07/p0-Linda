@@ -21,6 +21,17 @@ public class Transaction implements Serializable {
 	private TransactionType type;
 	private LocalDateTime timestamp;
 	
+	
+	public Transaction() {
+	}
+	public Transaction(Account fromAccountId, Account toAccountId, Double amount, TransactionType type,
+			LocalDateTime timestamp) {
+		this.fromAccountId = fromAccountId;
+		this.toAccountId = toAccountId;
+		this.amount = amount;
+		this.type = type;
+		this.timestamp = timestamp;
+	}
 	public Account getSender() {
 		return fromAccountId;
 	}

@@ -23,6 +23,17 @@ public class Account implements Serializable {
 	private boolean approved;
 	private List<Transaction> transactions;
 	
+	public Account() {
+	}
+	public Account(Integer accountId, Integer ownerId, Double balance, AccountType type, boolean approved,
+			List<Transaction> transactions) {
+		this.accountId = accountId;
+		this.ownerId = ownerId;
+		this.balance = balance;
+		this.type = type;
+		this.approved = approved;
+		this.transactions = transactions;
+	}
 	public Integer getId() {
 		return accountId;
 	}
@@ -59,6 +70,7 @@ public class Account implements Serializable {
 	public void setTransactions(List<Transaction> transactions) {
 		this.transactions = transactions;
 	}
+	
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
