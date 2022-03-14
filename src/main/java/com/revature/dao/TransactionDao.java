@@ -14,4 +14,5 @@ public interface TransactionDao {
 	 * @return a list of transactions ordered by timestamp
 	 */
 	public List<Transaction> getAllTransactions();
+	public Transaction addTransaction(Transaction t);
 }

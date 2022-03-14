@@ -5,11 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.revature.beans.Account;
 import com.revature.beans.Account.AccountType;
+import com.revature.beans.Transaction;
+import com.revature.beans.Transaction.TransactionType;
 import com.revature.beans.User.UserType;
 import com.revature.beans.User;
 import com.revature.utils.ConnectionUtil;
@@ -56,7 +59,6 @@ public class AccountDaoDB implements AccountDao {
 				a.setId(rs.getInt("account_id"));
 				a.setOwnerId(rs.getInt("owner_id"));
 				a.setBalance(rs.getDouble("balance"));
-				//a.setType((AccountType) rs.getObject("account_type"));
 				a.setType(AccountType.valueOf(rs.getString("account_type")));
 				a.setApproved(rs.getBoolean("approved"));
 			}
@@ -79,7 +81,6 @@ public class AccountDaoDB implements AccountDao {
 				a.setId(rs.getInt("account_id"));
 				a.setOwnerId(rs.getInt("owner_id"));
 				a.setBalance(rs.getDouble("balance"));
-				//a.setType((AccountType) rs.getObject("account_type"));
 				a.setType(AccountType.valueOf(rs.getString("account_type")));
 				a.setApproved(rs.getBoolean("approved"));
 				accountList.add(a);
@@ -100,11 +101,9 @@ public class AccountDaoDB implements AccountDao {
 			rs = stmt.executeQuery(query);
 			while (rs.next()) {
 				Account a = new Account();
-				//a.setId(rs.getInt("id"));
 				a.setId(rs.getInt("account_id"));
 				a.setOwnerId(rs.getInt("owner_id"));
 				a.setBalance(rs.getDouble("balance"));
-				//a.setType((AccountType) rs.getObject("account_type"));
 				a.setType(AccountType.valueOf(rs.getString("account_type")));
 				a.setApproved(rs.getBoolean("approved"));
 				accountList.add(a);
@@ -118,18 +117,47 @@ public class AccountDaoDB implements AccountDao {
 
 	public Account updateAccount(Account a) {
 		// TODO Auto-generated method stub
-		String query = "update account set owner_id=?, balance=?, account_type=?, approved=? where account_id=?";
+		String query = "update account set owner_id=?, balance=?, account_type=?, approved=?, transaction = ? where account_id=?";
 		try {
 			pstmt = conn.prepareStatement(query);
 			pstmt.setInt(1, a.getOwnerId());
 			pstmt.setDouble(2, a.getBalance());
 			pstmt.setObject(3, a.getType().toString());
 			pstmt.setBoolean(4, a.isApproved());
-			//pstmt.setObject(5, UserType.CUSTOMER);
-			//pstmt.setString(5, UserType.CUSTOMER.toString());
-			pstmt.setInt(5, a.getId());
+			
+			List<Transaction>  transaction = a.getTransactions();
+			if (transaction == null)
+			{
+				pstmt.setObject(5, null);				
+			}
+			else
+			{
+				Transaction transactionLast = new Transaction();;
+				if (transaction != null && !transaction.isEmpty()) 
+				{
+					  transactionLast = transaction.get(transaction.size()-1);
+				}
+				Integer fromAccountId = transactionLast.getSender().getId();
+				Integer toAccountId;
+				
+				if (transactionLast.getRecipient() == null)
+			    	toAccountId = null;
+				else
+					toAccountId = transactionLast.getRecipient().getId();
+				
+				Double amount = transactionLast.getAmount();
+			    TransactionType type = transactionLast.getType();
+			    LocalDateTime timestamp =  transactionLast.getTimestamp();
+				 
+			    String jsonText = String.format ("{\"from_accountId\": %d,\"to_accountId\": %d,\"amount\": %f,\"transaction_type\": \"%s\",\"timestamp\": \"%s\"}", fromAccountId, toAccountId,amount, type, timestamp);
+				
+				System.out.println("jsonText -- " + jsonText); 
+				
+				pstmt.setObject(5, jsonText);
+			}
+			
+			pstmt.setInt(6, a.getId());
 			pstmt.executeUpdate();
-			//stmt.executeUpdate(query);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -144,13 +172,10 @@ public class AccountDaoDB implements AccountDao {
 		try {
 			stmt = conn.createStatement();
 			status = stmt.execute(query);
-			
-			//stmt.executeUpdate(query);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return status;
 	}
-
 }

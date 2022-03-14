@@ -9,6 +9,8 @@ import com.revature.beans.Transaction;
 import com.revature.beans.Transaction.TransactionType;
 import com.revature.beans.User;
 import com.revature.dao.AccountDao;
+import com.revature.dao.TransactionDao;
+import com.revature.dao.TransactionDaoDB;
 import com.revature.exceptions.OverdraftException;
 import com.revature.exceptions.UnauthorizedException;
 
@@ -20,6 +22,7 @@ public class AccountService {
 	public AccountDao actDao;
 	public static final double STARTING_BALANCE = 25d;
 	List<Transaction> tranList = new ArrayList<Transaction>();
+	TransactionDao tranDao = new TransactionDaoDB();
 	
 	public AccountService(AccountDao dao) {
 		this.actDao = dao;
@@ -39,15 +42,15 @@ public class AccountService {
 		}
 		else {
 			a.setBalance(a.getBalance() - amount);
-			// below does not work, for recording transactions
+
 			Transaction transaction = new Transaction(a,null,amount,TransactionType.WITHDRAWAL,LocalDateTime.now());
 			if (a.getTransactions() != null) {
 				for (Transaction tran:a.getTransactions()) {
 				tranList.add(tran);
 				}
 			}
-			
 			tranList.add(transaction);
+			tranDao.addTransaction(transaction);
 			a.setTransactions(tranList);
 		}
 	}
@@ -62,15 +65,15 @@ public class AccountService {
 		}
 		else {
 			a.setBalance(a.getBalance() + amount);
-			// below does not work, for recording transactions
+			
 			Transaction transaction = new Transaction(a,null,amount,TransactionType.DEPOSIT,LocalDateTime.now());
 			if (a.getTransactions() != null) {
 				for (Transaction tran:a.getTransactions()) {
 				tranList.add(tran);
 				}
 			}
-			
 			tranList.add(transaction);
+			tranDao.addTransaction(transaction);
 			a.setTransactions(tranList);
 		}
 	}
@@ -92,7 +95,7 @@ public class AccountService {
 		else {
 			fromAct.setBalance(fromAct.getBalance() - amount);
 			toAct.setBalance(toAct.getBalance() + amount);
-			// below does not work, for recording transactions
+
 			Transaction transaction = new Transaction(fromAct,toAct,amount,TransactionType.TRANSFER,LocalDateTime.now());
 			
 			if (fromAct.getTransactions() != null) {
@@ -110,6 +113,7 @@ public class AccountService {
 				}
 			}
 			tranList2.add(transaction);
+			tranDao.addTransaction(transaction);
 			toAct.setTransactions(tranList2);
 		}
 	}
@@ -139,6 +143,9 @@ public class AccountService {
 			if (approval == true) {
 				a.setApproved(approval);
 				apprRes = true;
+			}
+			else if (approval == false) {
+				a.setApproved(approval);
 			}
 		}
 		return apprRes;

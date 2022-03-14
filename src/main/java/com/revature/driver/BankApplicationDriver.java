@@ -23,12 +23,10 @@ public class BankApplicationDriver {
 		String ln = null;
 		String un = null;
 		String pw = null;
+		int type = 0;
 		
-		//User use = new User();
 		Scanner scan = new Scanner(System.in);
-	    //UserDao userDao = new UserDaoFile();
 		UserDao userDao = new UserDaoDB();
-	    //AccountDao accDao = new AccountDaoFile();
 		AccountDao accDao = new AccountDaoDB();
 	    UserService userServ = new UserService(userDao, accDao);
 	    AccountService accServ = new AccountService(accDao);
@@ -47,7 +45,6 @@ public class BankApplicationDriver {
 	    	
 	    	switch (choice) {
 	    	case 1:
-	    		//id = userDao.getAllUsers().size();
 	    		System.out.print("Enter first name: ");
 	    		fn = scan.next();
 	    		System.out.print("Enter last name: ");
@@ -56,9 +53,19 @@ public class BankApplicationDriver {
 	    		un = scan.next();
 	    		System.out.print("Enter password: ");
 	    		pw = scan.next();
-	    		
-	    		User user1 = new User(id++, un, pw, fn, ln, UserType.CUSTOMER);
-	    		userServ.register(user1);
+	    		System.out.print("Registering as a [1.Customer, 2.Employee]: ");
+	    		type = scan.nextInt();
+	    		if (type == 1) {
+	    			User user1 = new User(id++, un, pw, fn, ln, UserType.CUSTOMER);
+	    			userServ.register(user1);
+	    		}
+	    		else if (type == 2) {
+	    			User user1 = new User(id++, un, pw, fn, ln, UserType.EMPLOYEE);
+	    			userServ.register(user1);
+	    		}
+	    		else {
+	    			System.out.println("Please input a correct type.");
+	    		}
 	    		break;
 	    	case 2:
 	    		System.out.print("Enter username: ");
@@ -66,11 +73,10 @@ public class BankApplicationDriver {
 	    		System.out.print("Enter password: ");
 	    		pw = scan.next();
 	    		User user2 = userDao.getUser(un, pw);
-	    		if (user2 == null) {
+	    		if (user2.getId() == null) {
 	    			System.out.println("User " + un + " is not found or Password " + pw + " does not match.");
 	    		}
 	    		else {
-	    			//userServ.login(un, pw);
 	    			System.out.println("Login successful.");
 	    			SessionCache.setCurrentUser(user2);
 	    			
@@ -82,9 +88,8 @@ public class BankApplicationDriver {
 	    			double amount = 0.0;
 	    			Account acc = new Account();
 	    			List<Account> accList = new ArrayList<Account>();
-	    			//User loggedUser = userServ.login(un, pw);
 	    			
-	    			System.out.println("logged user" + user2);
+	    			System.out.println("logged user " + user2);
 	    			while(option <= 6) {
 	    				System.out.println("1. Apply account"
 		    					+ "\n2. Deposit"
@@ -96,16 +101,14 @@ public class BankApplicationDriver {
 		    			option = scan.nextInt();
 	    				switch (option) {
 						case 1:
-							System.out.print("select an account type [1.Checking, 2.Saving]: ");
+							System.out.print("Select an account type [1.Checking, 2.Saving]: ");
 							accType = scan.nextInt();
 							System.out.print("Enter starting balance: " );
 							startBal = scan.nextDouble();
-							//Account acc = new Account();
 							acc.setBalance(startBal);
 							acc.setOwnerId(user2.getId());
 							acc.setType(accType == 1 ? AccountType.CHECKING : AccountType.SAVINGS);
-							acc.setId(id++);
-							//List<Account> accList = new ArrayList<Account>();
+							acc.setId(id2++);
 							accList.add(acc);
 							user2.setAccounts(accList);
 							accServ.createNewAccount(user2);
@@ -114,17 +117,20 @@ public class BankApplicationDriver {
 						case 2:
 							System.out.println("Available accounts for this user");
 							accDao.getAccountsByUser(user2).forEach(System.out::println);
-							//List<Account> accList = new ArrayList<Account>();
-							//accList = accDao.getAccountsByUser(user2);
 							System.out.print("Enter account ID to Deposit: ");
 							accountId = 0;
 							accountId = scan.nextInt();
-							System.out.print("Enter the amount to deposit: ");
+							System.out.print("Enter amount to Deposit: ");
 							amount = 0.0;
 							amount = scan.nextDouble();
 							acc = accDao.getAccount(accountId);
-							accServ.deposit(acc, amount);
-							accDao.updateAccount(acc);
+							if (acc.isApproved() == true) {
+								accServ.deposit(acc, amount);
+								accDao.updateAccount(acc);
+							}
+							else {
+								System.out.println("Sorry, only approved accounts can make transactions.");
+							}
 							break;
 						case 3:
 							System.out.println("Available accounts for this user");
@@ -132,23 +138,28 @@ public class BankApplicationDriver {
 							System.out.print("Enter account ID to Withdraw: ");
 							accountId = 0;
 							accountId = scan.nextInt();
-							System.out.print("Enter the amount to Withdraw: ");
+							System.out.print("Enter amount to Withdraw: ");
 							amount = 0.0;
 							amount = scan.nextDouble();
 							acc = accDao.getAccount(accountId);
-							accServ.withdraw(acc, amount);
-							accDao.updateAccount(acc);
+							if (acc.isApproved() == true) {
+								accServ.withdraw(acc, amount);
+								accDao.updateAccount(acc);
+							}
+							else {
+								System.out.println("Sorry, only approved accounts can make transactions.");
+							}
 							break;
 						case 4:
 							System.out.println("Available accounts for this user");
 							accDao.getAccountsByUser(user2).forEach(System.out::println);
-							System.out.print("Enter account ID to transfer FROM: ");
+							System.out.print("Enter account ID to Transfer FROM: ");
 							int tFrom = 0;
 							tFrom = scan.nextInt();
-							System.out.print("Enter account ID to transfer TO: ");
+							System.out.print("Enter account ID to Transfer TO: ");
 							int tTo = 0;
 							tTo = scan.nextInt();
-							System.out.print("Enter the amount to Withdraw: ");
+							System.out.print("Enter the amount to Transfer: ");
 							amount = 0.0;
 							amount = scan.nextDouble();
 							Account accFrom = new Account();
@@ -158,30 +169,28 @@ public class BankApplicationDriver {
 							accServ.transfer(accFrom, accTo, amount);
 							accDao.updateAccount(accFrom);
 							accDao.updateAccount(accTo);
-							//tranDao.getAllTransactions();
 							break;
 						case 5:
-							//if (user2.getUserType() == UserType.EMPLOYEE) {
-							System.out.println("Available accounts for this user");
-							//accDao.getAccountsByUser(user2).forEach(System.out::println);
-							accDao.getAccounts();
-							System.out.print("Enter account ID to approve or reject: ");
-							accountId = 0;
-							accountId = scan.nextInt();
-							System.out.print("Select an option [true for approve, false for reject]: ");
-							boolean optionAR = false;
-							optionAR = scan.nextBoolean();
-							acc = accDao.getAccount(accountId);
-							accServ.approveOrRejectAccount(acc, optionAR);
-							accDao.updateAccount(acc);
-							//}
-							//else {
-							//	System.out.println("Only employees can approve or reject transactions.");
-							//}
+							if (user2.getUserType() == UserType.EMPLOYEE) {
+								System.out.println("Available accounts for all users");
+								accDao.getAccounts().forEach(System.out::println);
+								System.out.print("Enter account ID to approve or reject: ");
+								accountId = 0;
+								accountId = scan.nextInt();
+								System.out.print("Select an option [true for approve, false for reject]: ");
+								boolean optionAR = false;
+								optionAR = scan.nextBoolean();
+								acc = accDao.getAccount(accountId);
+								accServ.approveOrRejectAccount(acc, optionAR);
+								accDao.updateAccount(acc);
+							}
+							else {
+								System.out.println("Sorry, only employees can approve or reject accounts.");
+							}
 							
 							break;
 						case 6:
-							System.out.print("Do you want to Logout? (1.Yes/2.No) :");
+							System.out.print("Do you want to Logout? [1.Yes, 2.No] :");
 							int logout = 0;
 							logout = scan.nextInt();
 							if (logout == 1) {
@@ -196,11 +205,9 @@ public class BankApplicationDriver {
 						}
 	    			}
 	    		}
-	    		//userServ.login(un, pw);
 	    		break;
 	    	case 3:
 	    		userDao.getAllUsers();
-	    		//userDao.getAllUsers().forEach(System.out::println);
 	    		break;
 	    	case 4:
 	    		System.out.print("Enter username: ");

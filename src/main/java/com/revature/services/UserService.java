@@ -27,7 +27,7 @@ public class UserService {
 	 * @return the User who is now logged in
 	 */
 	public User login(String username, String password) {
-		if (userdao.getAllUsers().contains(userdao.getUser(username, password))) {
+		if (userdao.getUser(username, password) != null) {
 			return (User) userdao;
 		}
 		else {
@@ -41,13 +41,11 @@ public class UserService {
 	 * @throws UsernameAlreadyExistsException if the given User's username is taken
 	 */
 	public void register(User newUser) {
-		//if (userDao.getAllUsers().contains(newUser)) {
-//		if ((userdao.getAllUsers()).indexOf(newUser) == -1) { // currently prints out contents of file, make sure to not do that
-//			userdao.addUser(newUser);
-//		}
-//		else {
-//			throw new UsernameAlreadyExistsException();
-//		}
-		userdao.addUser(newUser);
+		if ((userdao.getUser(newUser.getUsername(), newUser.getPassword())).getId() == null) {
+			userdao.addUser(newUser);
+		}
+		else {
+			throw new UsernameAlreadyExistsException();
+		}	
 	}
 }

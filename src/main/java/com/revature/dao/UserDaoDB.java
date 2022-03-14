@@ -35,14 +35,12 @@ public class UserDaoDB implements UserDao {
 			pstmt.setString(2, user.getLastName());
 			pstmt.setString(3, user.getUsername());
 			pstmt.setString(4, user.getPassword());
-			//pstmt.setObject(5, UserType.CUSTOMER.toString());
-			pstmt.setString(5, UserType.CUSTOMER.toString());
+			pstmt.setString(5, user.getUserType().toString());
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		return user;
 	}
 
@@ -59,40 +57,31 @@ public class UserDaoDB implements UserDao {
 				user.setLastName(rs.getString("last_name"));
 				user.setUsername(rs.getString("username"));
 				user.setPassword(rs.getString("password"));
-				//user.setUserType((UserType) rs.getObject("user_type"));
-				//user.setUserType(UserType.CUSTOMER);
 				user.setUserType(UserType.valueOf(rs.getString("user_type")));
-				//user.setUserType(rs.getString("user_type"));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		return user;
 	}
 
 	public User getUser(String username, String pass) {
 		// TODO Auto-generated method stub
 		String query = "select * from p0_user where username=? and password=?";
-		//String query = "select username from p0_user where username=?";
 		User user = new User();
 		try {
 			pstmt= conn.prepareStatement(query);
 			pstmt.setString(1, username);
 			pstmt.setString(2, pass);
 			rs = pstmt.executeQuery();
-			//rs = pstmt.executeQuery(query);
 			if (rs.next()) {
 				user.setId(rs.getInt("id"));
 				user.setFirstName(rs.getString("first_name"));
 				user.setLastName(rs.getString("last_name"));
 				user.setUsername(rs.getString("username"));
 				user.setPassword(rs.getString("password"));
-				//user.setUserType((UserType) rs.getObject("user_type"));
-				//user.setUserType(UserType.CUSTOMER);
 				user.setUserType(UserType.valueOf(rs.getString("user_type")));
-				//user.setUserType(rs.getString("user_type"));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -106,7 +95,6 @@ public class UserDaoDB implements UserDao {
 		// TODO Auto-generated method stub
 		String query = "select * from p0_user";
 		List<User> userList = new ArrayList<User>();
-		//userList.clear();
 		
 		try {
 			stmt = conn.createStatement();
@@ -119,13 +107,10 @@ public class UserDaoDB implements UserDao {
 				u.setLastName(rs.getString("last_name"));
 				u.setUsername(rs.getString("username"));
 				u.setPassword(rs.getString("password"));
-				//u.setUserType((UserType) rs.getObject("user_type"));
-				//u.setUserType(UserType.CUSTOMER);
 				u.setUserType(UserType.valueOf(rs.getString("user_type")));
-				//u.setUserType(rs.getString("user_type"));
 				userList.add(u);
 			}
-			System.out.println("userList --" + userList + "\n");
+			userList.forEach(System.out::println);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -142,11 +127,9 @@ public class UserDaoDB implements UserDao {
 			pstmt.setString(2, u.getLastName());
 			pstmt.setString(3, u.getUsername());
 			pstmt.setString(4, u.getPassword());
-			//pstmt.setObject(5, UserType.CUSTOMER);
-			pstmt.setString(5, UserType.CUSTOMER.toString());
+			pstmt.setString(5, u.getUserType().toString());
 			pstmt.setInt(6, u.getId());
 			pstmt.executeUpdate();
-			//stmt.executeUpdate(query);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -161,8 +144,6 @@ public class UserDaoDB implements UserDao {
 		try {
 			stmt = conn.createStatement();
 			status = stmt.execute(query);
-			
-			//stmt.executeUpdate(query);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

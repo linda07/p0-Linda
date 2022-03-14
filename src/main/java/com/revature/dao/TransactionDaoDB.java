@@ -34,7 +34,7 @@ public class TransactionDaoDB implements TransactionDao {
 			rs = stmt.executeQuery(query);
 			while(rs.next()) {
 				Transaction transaction = new Transaction();
-				transaction.setType((TransactionType) rs.getObject("transaction_type"));
+				transaction.setType(TransactionType.valueOf(rs.getString("transaction_type")));
 				transaction.setSender((Account) rs.getObject("from_accountId"));
 				if((TransactionType)rs.getObject("transaction_type") == TransactionType.TRANSFER) {
 					transaction.setRecipient((Account) rs.getObject("to_accountId"));
@@ -49,5 +49,25 @@ public class TransactionDaoDB implements TransactionDao {
 		}
 		return transactionList;
 	}
-
+	public Transaction addTransaction(Transaction t) {
+		String query = "insert into transactions (from_accountID,to_accountID,amount,transaction_type,timestamp) values (?,?,?,?,?)";
+		try {
+			pstmt = conn.prepareStatement(query);
+			pstmt.setObject(1, t.getSender().getId());
+			if (t.getRecipient() == null) {
+				pstmt.setObject(2, null);
+			}
+			else {
+				pstmt.setObject(2, t.getRecipient().getId());
+			}
+			pstmt.setDouble(3, t.getAmount());
+			pstmt.setObject(4, t.getType().toString());
+			pstmt.setObject(5, t.getTimestamp().toString());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return t;
+	}
 }

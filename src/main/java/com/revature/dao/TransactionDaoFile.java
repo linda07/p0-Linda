@@ -12,5 +12,8 @@ public class TransactionDaoFile implements TransactionDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	public Transaction addTransaction(Transaction t) {
+		
+		return null;
+	}
 }

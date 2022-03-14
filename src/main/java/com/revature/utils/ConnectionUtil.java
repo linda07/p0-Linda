@@ -14,9 +14,6 @@ public class ConnectionUtil {
 	private static ConnectionUtil cu = null;
 	private static Properties prop;
 	private static Connection conn;
-//	private static String url=null;// = "jdbc:mysql://localhost:3306/p0";
-//	private static String username=null;
-//	private static String password=null;
 	private static String url = "jdbc:mysql://localhost:3306/p0";
 	private static String username = "root";
 	private static String password = "password";

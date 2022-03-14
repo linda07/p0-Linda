@@ -74,9 +74,6 @@ public class User implements Serializable {
 	public void setUserType(UserType userType) {
 		this.userType = userType;
 	}
-//	public void setUserType(String userType) {
-//		this.userType = UserType.valueOf(userType);
-//	}
 	public List<Account> getAccounts() {
 		return accounts;
 	}
